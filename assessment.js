@@ -1,12 +1,12 @@
 'use strict';
-const userNameInput    = document.getElementById('user-name');
+const userNameInput = document.getElementById('user-name');
 const assessmentButton = document.getElementById('assessment');
-const resultDivision   = document.getElementById('result-area');
-const tweetDivision    = document.getElementById('tweet-area');
+const resultDivision = document.getElementById('result-area');
+const tweetDivision = document.getElementById('tweet-area');
 
 assessmentButton.onclick = () => {
   const userName = userNameInput.value;
-  if(userName.length === 0) {
+  if (userName.length === 0) {
     // 名前が空の時は処理を終了する
     return;
   }
@@ -22,15 +22,17 @@ assessmentButton.onclick = () => {
   paragraph.innerText = result;
   resultDivision.appendChild(paragraph);
 
-  
+  // ツイートエリアの作成
   tweetDivision.innerText = '';
   const anchor = document.createElement('a');
   const hrefValue =
-    'https://twitter.com/intent/tweet?button_hashtag=あなたのいいところ&ref_src=twsrc%5Etfw';
+    'https://twitter.com/intent/tweet?button_hashtag=' +
+    encodeURIComponent('あなたのいいところ') +
+    '&ref_src=twsrc%5Etfw';
 
   anchor.setAttribute('href', hrefValue);
   anchor.setAttribute('class', 'twitter-hashtag-button');
-  anchor.setAttribute('data-text', '診断結果の文章');
+  anchor.setAttribute('data-text', result);
   anchor.innerText = 'Tweet #あなたのいいところ';
 
   tweetDivision.appendChild(anchor);
@@ -38,7 +40,12 @@ assessmentButton.onclick = () => {
   const script = document.createElement('script');
   script.setAttribute('src', 'https://platform.twitter.com/widgets.js');
   tweetDivision.appendChild(script);
+};
 
+userNameInput.onkeydown = event => {
+  if (event.key === 'Enter') {
+    assessmentButton.onclick();
+  }
 };
 
 const answers = [
@@ -57,12 +64,12 @@ const answers = [
   '###userName###のいいところは好奇心です。新しいことに向かっていく###userName###の心構えが多くの人に魅力的に映ります。',
   '###userName###のいいところは気配りです。###userName###の配慮が多くの人を救っています。',
   '###userName###のいいところはその全てです。ありのままの###userName###自身がいいところなのです。',
-  '###userName###のいいところは自制心です。やばいと思ったときにしっかりと衝動を抑えられる###userName###が皆から評価されています。',
+  '###userName###のいいところは自制心です。やばいと思ったときにしっかりと衝動を抑えられる###userName###が皆から評価されています。'
 ];
 
 /**
  * 名前の文字列を渡すと診断結果を返す関数
- * @param {string} userName ユーザーの名前
+ * @param {string} userName ユーザの名前
  * @return {string} 診断結果
  */
 function assessment(userName) {
@@ -72,29 +79,21 @@ function assessment(userName) {
     sumOfCharCode = sumOfCharCode + userName.charCodeAt(i);
   }
 
-  // 文字のコード番号の合計を回答の数で割って添え字の数値を求める
+  // 文字のコード番号の合計を回答の数で割って添字の数値を求める
   const index = sumOfCharCode % answers.length;
   let result = answers[index];
-  
-   result = result.replaceAll('###userName###',userName);
-   return result;
+
+  result = result.replaceAll('###userName###', userName);
+  return result;
 }
 
 // テストコード
 console.assert(
-  assessment('太郎') === '太郎のいいところは決断力です。太郎がする決断にいつも助けられる人がいます。',
+  assessment('太郎') ===
+    '太郎のいいところは決断力です。太郎がする決断にいつも助けられる人がいます。',
   '診断結果の文言の特定の部分を名前に置き換える処理が正しくありません。'
 );
-
 console.assert(
   assessment('太郎') === assessment('太郎'),
-  '入力が同じ名前なら同じ診断結果を出力する処理が正しくありません'
-)
-
-
-
-userNameInput.onkeydown = event => {
-  if (event.key === 'Enter') {
-    assessmentButton.onclick(); //ボタンクリックした時と同じ関数
-  }
-};
+  '入力が同じ名前なら同じ診断結果を出力する処理が正しくありません。'
+);
